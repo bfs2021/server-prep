@@ -95,6 +95,8 @@ Usage: sudo $0 [options]
   --list-steps         print the step names
   -h, --help           this help
 
+Exit codes: 0 ok or skipped · 1 a step FAILED · 2 bad option, step name or config
+
 Steps: ${ALL_STEPS}
 EOF
 }
@@ -110,6 +112,10 @@ while [[ $# -gt 0 ]]; do
         -h|--help) usage; exit 0 ;;
         *) echo "Unknown option: $1" >&2; usage >&2; exit 2 ;;
     esac
+done
+
+for name in $ONLY $SKIP; do
+    [[ " $ALL_STEPS " == *" $name "* ]] || { echo "Unknown step: $name (valid: $ALL_STEPS)" >&2; exit 2; }
 done
 
 if [[ -n "$CONFIG_FILE" ]]; then
@@ -1883,6 +1889,9 @@ main() {
         echo; echo "${C_Y}  To do by hand:${C_0}"
         for i in "${MANUAL_TODO[@]}"; do echo "   - $i"; done
     fi
+    for res in "${STEP_RESULTS[@]}"; do
+        [[ "$res" == "FAILED" ]] && exit 1
+    done
 }
 
 main "$@"

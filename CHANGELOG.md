@@ -5,6 +5,8 @@ Highlights of each release. The full list of merged pull requests is in each
 
 ## [Unreleased]
 
+- `server-prep.sh` exits 1 when any step FAILED and rejects an unknown `--only`/`--skip` step name with exit 2 (exit codes now documented in `--help`).
+
 - [Wiki](https://github.com/exceev-consulting/server-prep/wiki): beginner path, concepts, panels, troubleshooting, FAQ,
   glossary, architecture and roadmap. Its source lives in `wiki/` and `.github/workflows/wiki.yml` publishes it.
 - Discussions forms for Q&A, Ideas and Show and tell (setups and compatibility reports).
