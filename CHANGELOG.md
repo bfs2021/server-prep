@@ -5,6 +5,9 @@ Highlights of each release. The full list of merged pull requests is in each
 
 ## [Unreleased]
 
+- The Telegram daily report shows `-` only when the rkhunter log is missing; a clean log now shows `rkhunter warnings: 0` instead of `0` followed by a stray `-`.
+- `server-prep.sh` exits 1 when any step FAILED and rejects an unknown `--only`/`--skip` step name with exit 2 (exit codes now documented in `--help`).
+
 - `server-prep.sh` exits 1 when any step FAILED and rejects an unknown `--only`/`--skip` step name with exit 2 (exit codes now documented in `--help`).
 
 - [Wiki](https://github.com/exceev-consulting/server-prep/wiki): beginner path, concepts, panels, troubleshooting, FAQ,
