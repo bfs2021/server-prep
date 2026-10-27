@@ -95,7 +95,10 @@ Usage: sudo $0 [options]
   --list-steps         print the step names
   -h, --help           this help
 
-Exit codes: 0 ok or skipped · 1 a step FAILED · 2 bad option, step name or config
+Exit codes:
+  0  every selected step ran fine or was skipped
+  1  a step FAILED, or the run stopped early (not root, unsupported OS, aborted, invalid settings)
+  2  wrong command line: unknown option or step name, or unreadable --config file
 
 Steps: ${ALL_STEPS}
 EOF
@@ -112,10 +115,6 @@ while [[ $# -gt 0 ]]; do
         -h|--help) usage; exit 0 ;;
         *) echo "Unknown option: $1" >&2; usage >&2; exit 2 ;;
     esac
-done
-
-for name in $ONLY $SKIP; do
-    [[ " $ALL_STEPS " == *" $name "* ]] || { echo "Unknown step: $name (valid: $ALL_STEPS)" >&2; exit 2; }
 done
 
 if [[ -n "$CONFIG_FILE" ]]; then
@@ -138,6 +137,13 @@ set_panel_label() {   # display name used in questions, notes and the report
     esac
 }
 set_panel_label
+# Validate --only/--skip against ALL_STEPS after the config file has had its
+# say, so a bad name from either source stops here (exit 2) - before
+# preflight, and before anything on the server changes.
+read -ra step_names <<< "$ONLY $SKIP"   # split on spaces, no glob expansion
+for name in "${step_names[@]}"; do
+    [[ " $ALL_STEPS " == *" $name "* ]] || { echo "Unknown step: $name (valid: $ALL_STEPS)" >&2; exit 2; }
+done
 [[ -r /dev/tty ]] || { [[ $INTERACTIVE -eq 1 ]] && { echo "No terminal: use --yes with --config" >&2; exit 2; }; }
 
 # ----------------------------------------------------------------------------
@@ -1890,8 +1896,9 @@ main() {
         for i in "${MANUAL_TODO[@]}"; do echo "   - $i"; done
     fi
     for res in "${STEP_RESULTS[@]}"; do
-        [[ "$res" == "FAILED" ]] && exit 1
+        if [[ "$res" == "FAILED" ]]; then exit 1; fi
     done
+    return 0
 }
 
 main "$@"
